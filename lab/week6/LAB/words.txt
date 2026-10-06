@@ -1,0 +1,7 @@
+directory
+answer
+position
+phone
+powerpoint
+chrome
+internet

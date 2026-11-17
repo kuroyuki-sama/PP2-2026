@@ -5,44 +5,72 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 base_dir = os.path.dirname(current_dir)
 data_path = os.path.join(base_dir, "data")
 
-p_count = 1
-information = {"id":None, "name":None, "birth_year":None, "gender":None, "height":None, "weight":None, "BMI":None, "status":None}
-total_information = []
+class INFO:
+    id = 1
+    def __init__(self, name, birth_year, gender, height, weight, bmi = None, status = None):
+        self.name, self.birth_year, self.gender, self.height, self.weight, self.bmi, self.status = name, birth_year, gender, height, weight, bmi, status
+        self.id = f"P2026-{INFO.id:04d}"
+        INFO.id += 1
 
-flag = 0
-while not flag:
-    print("===== 환자 기본 정보 입력 =====")
-    print("이름, 생년, 성별, 키, 몸무게 : ")
-    name, birthyear, gender, height, weight = input().split()  
-    bmi = round(int(weight) / (int(height) / 100) ** 2, 2)
-    status = None
+        self.check_bmi()
 
-    if bmi < 18.5: status = "저체중"
-    elif 18.5 <= bmi < 23: status = "정상"
-    elif bmi >= 23: status = "비만"
+    def check_bmi(self):
+        self.bmi = round(int(self.weight) / (int(self.height) / 100) ** 2, 2)
+        if self.bmi < 18.5: self.status = "저체중"
+        elif 18.5 <= self.bmi < 23: self.status = "정상"
+        elif self.bmi >= 23: self.status = "비만"
 
-    information.update({
-        "id" : f"P2026-{p_count:04d}",
-        "name" : name,
-        "birth_year" : birthyear,
-        "gender" : gender,
-        "height" : int(height),
-        "weight" : int(weight),
-        "BMI" : bmi,
-        "status" : status
-    })
-    total_information.append(information.copy())
-    p_count += 1
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "birth_year": self.birth_year,
+            "gender": self.gender,
+            "height": self.height,
+            "weight": self.weight,
+            "BMI": self.bmi,
+            "status": self.status
+        }
 
-    continue_input = input("계속 입력하시겠습니까? (y / n) : ")
-    if continue_input.lower() == "n": flag = 1
-# print(total_information)
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            data["name"],
+            data["birth_year"],
+            data["gender"],
+            data["height"],
+            data["weight"],
+            data["id"]
+        )
+
+# health_logic 으로 이동
+# class PatientManager:
+#     def __init__(self):
+#         self.total_information = []
+
+#     def check_duplicate(self, name, birth_year, gender):
+#         for patient in self.total_information:
+#             if (patient["name"] == name and patient["birth_year"] == birth_year and patient["gender"] == gender): return True
+
+#         return False
+
+#     def add_patient(self, name, birth_year, gender, height, weight):
+#         if self.check_duplicate(name, birth_year, gender):
+#             print("이미 등록된 환자입니다.")
+
+#         patient = INFO(name, birth_year, gender, height, weight)
+#         patient_data = patient.to_dict()
+#         self.total_information.append(patient_data)
+
+#         return patient_data
+
+# manager = PatientManager()
 
 # AI 사용 (사용법 질문)
-    json_path = os.path.join(data_path, "health_data.json")
-    csv_path = os.path.join(data_path, "health_data.csv")
-    txt_path = os.path.join(data_path, "health_data.txt")
-    pkl_path = os.path.join(data_path, "health_data.pkl")
+json_path = os.path.join(data_path, "health_data.json")
+csv_path = os.path.join(data_path, "health_data.csv")
+txt_path = os.path.join(data_path, "health_data.txt")
+pkl_path = os.path.join(data_path, "health_data.pkl")
 
 def save():
     with open(json_path, "w", encoding="utf-8") as f:
@@ -51,7 +79,7 @@ def save():
     with open(csv_path, "w", encoding="utf-8-sig") as f:
         writer = csv.writer(f)
 
-        writer.writerow(["ID", "이름", "생년", "성별", "키", "몸무게", "BMI", "소견"])
+        writer.writerow(["ID", "이름", "생년", "성별", "키", "몸무게", "bmi", "소견"])
         for idx in range(len(total_information)):
             writer.writerow([
                 total_information[idx]["id"],
@@ -59,7 +87,7 @@ def save():
                 total_information[idx]["birth_year"],
                 total_information[idx]["height"],
                 total_information[idx]["weight"],
-                total_information[idx]["BMI"],
+                total_information[idx]["bmi"],
                 total_information[idx]["status"]
             ])
 

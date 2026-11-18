@@ -72,26 +72,29 @@ csv_path = os.path.join(data_path, "health_data.csv")
 txt_path = os.path.join(data_path, "health_data.txt")
 pkl_path = os.path.join(data_path, "health_data.pkl")
 
-def save():
-    with open(json_path, "w", encoding="utf-8") as f:
+def save(patient_list):
+    total_information = [patient.to_dict() for patient in patient_list]
+
+    with open(json_path, "w", encoding="utf-8") as f: #json
         json.dump(total_information, f, ensure_ascii=False, indent=4)
 
-    with open(csv_path, "w", encoding="utf-8-sig") as f:
+    with open(csv_path, "w", newline="", encoding="utf-8-sig") as f: #csv
         writer = csv.writer(f)
 
         writer.writerow(["ID", "이름", "생년", "성별", "키", "몸무게", "bmi", "소견"])
-        for idx in range(len(total_information)):
+        for info in total_information:
             writer.writerow([
-                total_information[idx]["id"],
-                total_information[idx]["name"],
-                total_information[idx]["birth_year"],
-                total_information[idx]["height"],
-                total_information[idx]["weight"],
-                total_information[idx]["bmi"],
-                total_information[idx]["status"]
+                info["id"],
+                info["name"],
+                info["birth_year"],
+                info["gender"],
+                info["height"],
+                info["weight"],
+                info["BMI"],
+                info["status"]
             ])
 
-    with open(txt_path, "w", encoding="utf-8") as f:
+    with open(txt_path, "w", encoding="utf-8") as f: #txt
         for info in total_information:
             for value in info.values():
                 f.write(f"{value},")
@@ -100,23 +103,46 @@ def save():
     with open(pkl_path, "wb") as f:
         pickle.dump(total_information, f)
 
-def load():
-    with open(json_path, "r", encoding="utf-8") as f:
-        print(json.load(f))
+def load(file_type=json):
+    if file_type == "json":
+        with open(json_path, "r", encoding="utf-8") as f:
+            total_information = json.load(f)
 
-    with open(csv_path, "r", newline="", encoding="utf-8-sig") as f:
-        reader = csv.reader(f)
+    elif file_type == "csv":
+        total_information = []
+        with open(csv_path, "r", newline="", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
 
-        for row in reader:
-            print(row)
+            for row in reader:
+                total_information.append({
+                    "id": row["ID"],
+                    "name": row["이름"],
+                    "birth_year": int(row["생년"]),
+                    "gender": row["성별"],
+                    "height": int(row["키"]),
+                    "weight": int(row["몸무게"]),
+                    "BMI": float(row["BMI"]),
+                    "status": row["소견"]
+                })
 
-    with open(txt_path, "r", encoding="utf-8") as f:
-        for lines in f:
-            print(lines.strip().split())
+    elif file_type == "txt":
+        with open(txt_path, "r", encoding="utf-8") as f:
+            for lines in f:
+                total_information.append(json.loads(lines))
 
-    with open(pkl_path, "rb") as f:
-        print(pickle.load(f))
+    elif file_type == "pkl":
+        with open(pkl_path, "rb") as f:
+            total_information = pickle.load(f)  
 
-if __name__ == "__main__":
-    save()
-    load()
+    else:
+        raise ValueError("지원하지 않는 파일 형식입니다.")
+
+    patient_list = [
+        INFO.from_dict(info) for info in total_information
+    ]
+
+    return patient_list
+
+# if __name__ == "__main__":
+#     save()
+#     load()

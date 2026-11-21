@@ -35,12 +35,12 @@ class INFO:
     @classmethod
     def from_dict(cls, data):
         return cls(
+            data["id"],
             data["name"],
             data["birth_year"],
             data["gender"],
             data["height"],
             data["weight"],
-            data["id"]
         )
 
 # health_logic 으로 이동
